@@ -14,7 +14,7 @@ export default function Home() {
   const [inputBuffer, setInputBuffer] = useState("");
   const [showMagic, setShowMagic] = useState(false);
 
-  const secretCode = "kinks";
+  const secretCode = "secretconsole";
 
   useEffect(() => {
     const handleHashChange = () => {
