@@ -1,36 +1,66 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+
   const [highlightProduits, setHighlightProduits] = useState(false);
   const [highlightHistoire, setHighlightHistoire] = useState(false);
   const [highlightContact, setHighlightContact] = useState(false);
+  const [inputBuffer, setInputBuffer] = useState("");
+  const [showMagic, setShowMagic] = useState(false);
+
+  const secretCode = "kinks";
 
   useEffect(() => {
     const handleHashChange = () => {
-      if (window.location.hash === "#produits") {
+      const hash = window.location.hash;
+      if (hash === "#produits") {
         setHighlightProduits(true);
         setTimeout(() => setHighlightProduits(false), 2000);
-      } else if (window.location.hash === "#histoire") {
+      } else if (hash === "#histoire") {
         setHighlightHistoire(true);
         setTimeout(() => setHighlightHistoire(false), 2000);
-      } else if (window.location.hash === "#contact") {
+      } else if (hash === "#contact") {
         setHighlightContact(true);
         setTimeout(() => setHighlightContact(false), 2000);
       }
     };
 
-    window.addEventListener("hashchange", handleHashChange);
-    handleHashChange(); // check initial
+    const handleKeydown = (e: KeyboardEvent) => {
+      const nextBuffer = (inputBuffer + e.key.toLowerCase()).slice(-secretCode.length);
+      setInputBuffer(nextBuffer);
+      if (nextBuffer === secretCode) {
+        setShowMagic(true);
+        setTimeout(() => {
+          router.push("/secret");
+        }, 1500);
+      }
+    };
 
-    return () => window.removeEventListener("hashchange", handleHashChange);
-  }, []);
+    window.addEventListener("hashchange", handleHashChange);
+    window.addEventListener("keydown", handleKeydown);
+    handleHashChange(); // Pour activer dès le chargement
+
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+      window.removeEventListener("keydown", handleKeydown);
+    };
+  }, [inputBuffer, router]);
 
   return (
     <>
+      {/* Animation magique quand le mot est tapé */}
+      {showMagic && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+          <div className="w-48 h-48 rounded-full bg-violet-500 opacity-70 animate-ping" />
+        </div>
+      )}
+
       {/* Header avec logo rond */}
       <header className="fixed top-0 left-0 w-full bg-purple-950/80 backdrop-blur z-50 border-b border-purple-800">
         <nav className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center text-white text-sm md:text-base">
@@ -55,7 +85,6 @@ export default function Home() {
       {/* Contenu principal */}
       <main className="min-h-screen bg-gradient-to-b from-purple-950 to-black text-white px-6 py-12 pt-28">
         <div className="max-w-5xl mx-auto text-center">
-          {/* Logo principal (grande taille) */}
           <Image
             src="/logo-sanarellia.png"
             alt="Logo Sanarellia"
@@ -70,7 +99,7 @@ export default function Home() {
             Herboristerie mystique – Encens lunaires – Alchimie ancestrale
           </p>
 
-          {/* Qui sommes-nous */}
+          {/* Histoire */}
           <section
             id="histoire"
             className={`bg-purple-900/40 p-6 rounded-2xl shadow-lg mb-16 max-w-3xl mx-auto transition-all duration-300 ${
@@ -112,7 +141,7 @@ export default function Home() {
             </button>
           </Link>
 
-          {/* Nous contacter */}
+          {/* Contact */}
           <section
             id="contact"
             className={`mt-20 text-center text-gray-300 text-sm max-w-xl mx-auto transition-all duration-300 ${
